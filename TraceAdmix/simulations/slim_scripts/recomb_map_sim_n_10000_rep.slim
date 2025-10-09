@@ -1,0 +1,52 @@
+initialize() {
+    if (!exists("OUTDIR")) {
+        defineConstant("OUTDIR", "./");
+    }
+    if (!exists("REP")) {
+        defineConstant("REP", 0);
+    }
+    if (!exists("RECOMBFILE")) {
+        stop("Error: RECOMBFILE was not provided!");
+    }
+
+    defineConstant("pop_size", 10000);
+    defineConstant("chrom_len", 25e7); 
+
+    initializeTreeSeq();
+    initializeMutationRate(0);
+    initializeMutationType("m1", 0.5, "f", 0.0);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, chrom_len - 1);
+
+    initializeRecombinationRateFromFile(RECOMBFILE, chrom_len - 1, 1.0);
+}
+
+1 early() {
+        sim.addSubpop("p3", pop_size); // "ANC"
+}
+1000 early() {
+        sim.addSubpop("p0", pop_size); // "RED"
+        sim.addSubpop("p1", pop_size); // "BLUE"
+        p0.setMigrationRates(p3, 1.0);
+        p1.setMigrationRates(p3, 1.0);
+        p3.setSubpopulationSize(0);
+}
+1899 late() {
+        sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
+}
+1900 early() {
+        sim.addSubpop("p2", pop_size); // "ADMIX"
+        p2.setMigrationRates(c(p0, p1), c(0.5, 0.5));
+}
+1901 early() {
+        p2.setMigrationRates(c(p0, p1), c(0, 0));
+}
+
+1900:1911 late() {
+    sim.treeSeqOutput(OUTDIR + "gen_" + sim.cycle + ".trees");
+    if (sim.cycle == 1911) {
+        sim.simulationFinished();
+    }
+}
+
+
