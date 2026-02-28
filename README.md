@@ -1,6 +1,6 @@
 # Quantifying cumulative ancestry switches in an admixed genome
 
-For more information about our research please refer to our work titled ["Analytical expectations for ancestry junction accumulation in admixed genomes"](https://www.biorxiv.org/content/10.1101/2025.10.28.685223v2.full.pdf)
+For more information about our research please refer to ["Analytical expectations for ancestry junction accumulation in admixed genomes"](https://www.biorxiv.org/content/10.1101/2025.10.28.685223v2.full.pdf)
 
 Below we will describe the files included in this repository
 
