@@ -1,68 +1,131 @@
-# Quantifying cumulative ancestry switches in an admixed genome
+# Modeling ancestry-junction accumulation in admixed genomes
 
-For more information about our research please refer to ["Analytical expectations for ancestry junction accumulation in admixed genomes"](https://www.biorxiv.org/content/10.1101/2025.10.28.685223v2.full.pdf)
+This repository contains the analytical calculations, forward-time simulations, empirical analyses, and figure-generation notebooks for:
 
-Below we will describe the files included in this repository
+> **Nataneli S, Karatas AL, Ferrari T, Patel RA, and Mooney JA.**
+> [Analytical expectations for ancestry junction accumulation in admixed genomes](https://doi.org/10.1093/genetics/iyag062).
+> *GENETICS* 233(2), iyag062 (2026).
 
-## Parameter dymanics:
-1. You can look at the parameter dymanics of Equation 3 via the file `"parameter_dynamics/main_param_dynamics.ipynb"`
-  * This will output Figure 1 (main text) if you set `final_g = 50` and Figure S1 (supplemental text) if  you set `final_g = 500`
-2. You can look at the parameter dymanics of Equation 2 via the file `"parameter_dynamics/supp_param_dynamics_per_gen.ipynb"`
-  * This will output Figure S2 (supplemental text)
-    
-## Simulated framework and ancestry switch estimation
-### Getting tree sequences from SLiM
-#### Constant recombination:
-1. SLiM simulation files are located in `"simulations/slim_scripts"`
-2. You can run the SLiM files (with replicates) via the file `“simulations/constant_recomb_run_slim_reps.ipynb”`
-    * The SLiM simulations will output tree sequences files in `“simulations/tree_outputs/constant_recomb”`
-#### Variable recombination (i.e. using recombination maps):
-1. You generate a simple recombination map using the file `“simulations/generate_recomb_map.ipynb”`
-    * This will output a text file called `“simple_recomb_map.txt”`, which will be used for the simulations and theoretical calculations.
-    * NOTE: The seed could not be recovered for the recombination map used for our actual analysis. To replicate our exact pipeline please use file `“simple_recomb_map_used_in analysis.txt”.`
-2. SLiM simulation files are located in `“simulations/slim_scripts”`
-3. You can run the SLiM files (with replicates) via the file `“simulations/recomb_map_run_slim_reps.ipynb”`
-    * SLiM will output tree sequences files in  `“simulations/tree_outputs/recomb_map”`
+## Overview
 
-### Processing tree sequences and extracting the number of switches
-1. You can process the `.tree` files by running `“simulations/sim_switch_analysis_reps.sh”` 
-    * This will output `.csv` files for each generation of each replicate in either `“tree_outputs/constant_recomb“` or `“obs_switches/recomb_map“`
-    * NOTE: both the constant recombination case and the variable recombination case can be run with the same file, but you must specify the path names correctly. See comments in script for more details.
-  
-### Calculating the expected number of switches from theory
-#### Constant recombination:
-1. You can calculate the theoretical switch count using the file `“simulations/constant_recomb_theory_exp.ipynb”`
-    * This will output a single `.csv` file in `“simulations/exp_switches/constant_recomb”`
-#### Variable recombination (i.e. using recombination maps):
-1. You can calculate the theoretical switch count using the file `“simulations/recomb_map_theory_exp.ipynb”`
-    * This will output a single `.csv` file in `“simulations/exp_switches/recomb_map”`
-  
-### Comparing simulated and empirical switch counts
-1. You can compare the number of switches for both the constant recombination case and the variable recombination case (i.e. using recombination maps) via the file `"simulations/main_switches_cases_pop_sizes.ipynb"`
-    * This will output Figure 3 (main text)
-2. You can compare results for the number of switches for populations of different sizes ($N_e = [100, 1000, 10000]$) via the file `"simulations/main_switches_cases_pop_sizes.ipynb"`
-    * This will output Figure S3 (supplemental text) for the constant recombination case and Figure S4 (supplemental text) for the variable recombination case (i.e. using recombination maps)
+Recombination progressively fragments ancestry tracts after admixture, creating ancestry junctions - positions where ancestry changes along a chromosome. This project develops a mathematical framework for predicting the accumulation of these junctions as a function of:
 
-## Application to African American populations
-### Calculating the expected number of switches from empirical data
-#### Inferring local ancestry with FLARE:
-the relative path is `"empirical/empirical_predictions/local_ancestry_infer/*"`
-1. `“config.yaml”` contains a list of the admixed populations and filepaths to their reference populations
-2. `“GRCh38_Map.zip”` contains the genetic map used in FLARE calls
-3. `“refPanels.zip”` contains reference panels for each population created using the inds in the files listed in the config
-4. `“Snakefile”` is the pipeline file
-#### Calling ancestry tracts from FLARE
-the relative path is `"empirical/empirical_predictions/calling_ancestry_tracts/*"`
-1. `“submit_get_anc_runs.sh”` calls `“get_anc_runs.sh”` and then  `“combines_anc_runs.sh”`
-2. `“get_anc_runs.sh”` takes in the FLARE data generated when inferring local ancestry and calls `“get_anc_runs.R”` to create a file of nonoverlapping ancetry tracts per haplpotype, per population
-#### Analyzing switch counts
-the relative path is `"empirical/empirical_predictions/analyzing_switch_counts/*"`
-1. `“analyze_anc.Rmd”` takes in the ancestry tracts generated from FLARE data as well as files that identify the unrelated individuals to generate filtered switch counts
-2. `“Rmd_auxiliary.R”` contains some function that`“analyze_anc.Rmd”` uses
+- generations since admixture;
+- recombination rate and recombination-map heterogeneity;
+- initial ancestry proportions and ancestry heterozygosity; and
+- effective population size.
 
-## Theoretical switch counts (relative path :
-the relative path is `"empirical/theoretical_predictions/*"`
-1. You can get theoretical switch counts for parameters estimated for chromosome 1 via the file `"main_theoretical_switches_multi_case.ipynb"`
-    * This will output Figure 4 (main text)
-2. You can get theoretical switch counts for all autosomes via the file `"supp_theoretical_switches_multi_case.ipynb"`
-    * This will output the information present in Table S1 (supplemental text)
+The analytical expectations are evaluated using SLiM forward-time simulations under constant and variable recombination models and compared with ancestry-switch counts from the ASW population in the 1000 Genomes Project.
+
+## Key results
+
+- Analytical expectations closely match forward-time simulation results.
+- The framework accommodates both uniform recombination and heterogeneous recombination maps.
+- Recombination and ancestry heterozygosity dominate short-term switch accumulation, while effective population size becomes increasingly important over longer timescales.
+- Model-based switch counts are consistent with empirical patterns observed in ASW genomes.
+
+![Comparison of simulated and theoretical ancestry-switch counts](TraceAdmix/simulations/figures/sim_vs_theory_N_14000_main.png)
+
+## Repository structure
+
+```text
+TraceAdmix/
+├── parameter_dynamics/   # Effects of model parameters through time
+├── simulations/          # SLiM simulations and theory/simulation comparisons
+└── empirical/            # Application to ASW ancestry-switch counts
+```
+
+### `parameter_dynamics/`
+
+Contains notebooks used to evaluate how ancestry proportion, recombination rate, effective population size, and time since admixture affect expected switch counts.
+
+### `simulations/`
+
+Contains:
+
+- SLiM scripts for constant and variable recombination scenarios;
+- notebooks for running simulation replicates;
+- Python and shell scripts for extracting ancestry switches from tree sequences;
+- notebooks for calculating theoretical expectations; and
+- notebooks for comparing simulated and theoretical switch counts.
+
+### `empirical/`
+
+Contains processed ASW switch-count summaries, chromosome lengths, CEU and YRI recombination maps, analytical notebooks, output tables, and the main empirical comparison figure.
+
+## Manuscript outputs
+
+| Output | Notebook |
+| --- | --- |
+| Figure 1 and Figure S1 | [`parameter_dynamics/main_param_dynamics.ipynb`](TraceAdmix/parameter_dynamics/main_param_dynamics.ipynb) |
+| Figure S2 | [`parameter_dynamics/supp_param_dynamics_per_gen.ipynb`](TraceAdmix/parameter_dynamics/supp_param_dynamics_per_gen.ipynb) |
+| Simulation schematic | [`simulations/slim_gameplan.ipynb`](TraceAdmix/simulations/slim_gameplan.ipynb) |
+| Figure 3 | [`simulations/main_switches_constant_recomb_map.ipynb`](TraceAdmix/simulations/main_switches_constant_recomb_map.ipynb) |
+| Figures S3 and S4 | [`simulations/supp_switches_diff_pop_sizes.ipynb`](TraceAdmix/simulations/supp_switches_diff_pop_sizes.ipynb) |
+| Figure 4 | [`empirical/main_theoretical_switches_multi_case.ipynb`](TraceAdmix/empirical/main_theoretical_switches_multi_case.ipynb) |
+| Table S1 | [`empirical/supp_theoretical_switches_multi_case.ipynb`](TraceAdmix/empirical/supp_theoretical_switches_multi_case.ipynb) |
+
+## Simulation workflow
+
+The simulation analysis proceeds through four stages:
+
+1. **Generate tree sequences** using the constant- or variable-recombination SLiM workflows.
+2. **Extract ancestry switches** from each replicate using `sim_switch_analysis_reps.py` and `sim_switch_analysis_reps.sh`.
+3. **Summarize simulated counts and calculate theoretical expectations** with the corresponding notebooks.
+4. **Compare theory and simulation** using the main and supplemental plotting notebooks.
+
+Important simulation files include:
+
+| Purpose | File |
+| --- | --- |
+| Run constant-recombination replicates | [`constant_recomb_run_slim_reps.ipynb`](TraceAdmix/simulations/constant_recomb_run_slim_reps.ipynb) |
+| Run recombination-map replicates | [`recomb_map_run_slim_reps.ipynb`](TraceAdmix/simulations/recomb_map_run_slim_reps.ipynb) |
+| Extract switch counts | [`sim_switch_analysis_reps.py`](TraceAdmix/simulations/sim_switch_analysis_reps.py) |
+| Calculate constant-recombination expectations | [`constant_recomb_theory_exp.ipynb`](TraceAdmix/simulations/constant_recomb_theory_exp.ipynb) |
+| Calculate recombination-map expectations | [`recomb_map_theory_exp.ipynb`](TraceAdmix/simulations/recomb_map_theory_exp.ipynb) |
+| Recombination map used in the published analysis | [`simple_recomb_map_used_in_analysis.txt`](TraceAdmix/simulations/simple_recomb_map_used_in_analysis.txt) |
+
+Generated tree sequences and other large intermediate simulation files are not stored in the repository and must be regenerated with the supplied workflows.
+
+## Requirements
+
+The analysis uses Python 3 and Jupyter with the following packages:
+
+```bash
+pip install jupyter numpy pandas matplotlib seaborn demes demesdraw tskit pyslim
+```
+
+[SLiM](https://messerlab.org/slim/) is required to regenerate the forward-time simulations.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/ShirNat/Quantifying-cumulative-ancestry-switches-in-an-admixed-genome.git
+cd Quantifying-cumulative-ancestry-switches-in-an-admixed-genome/TraceAdmix
+```
+
+The notebooks use relative paths. Launch each notebook from its containing analysis directory so that input and output paths resolve correctly.
+
+## Data availability
+
+The repository includes the processed ancestry-switch summaries and recombination maps required for the empirical comparison. The underlying high-coverage ASW whole-genome data are available through the [1000 Genomes Project](https://www.internationalgenome.org/data-portal/population/ASW) and are not redistributed here.
+
+Additional information about data processing, quality control, local-ancestry inference, model assumptions, and supplemental analyses is provided in the [published article](https://doi.org/10.1093/genetics/iyag062).
+
+## Citation
+
+If you use this code or framework, please cite:
+
+```text
+Nataneli S, Karatas AL, Ferrari T, Patel RA, Mooney JA. 2026.
+Analytical expectations for ancestry junction accumulation in admixed genomes.
+GENETICS 233(2): iyag062. https://doi.org/10.1093/genetics/iyag062
+```
+
+## Authors
+
+- Shirin Nataneli
+- Aydin Loid Karatas
+- Tessa Ferrari
+- Roshni A. Patel
+- Jazlyn A. Mooney
